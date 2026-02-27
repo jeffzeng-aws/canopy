@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Settings, Trash2, Save, AlertTriangle, BarChart3 } from 'lucide-react';
+import { Settings, Trash2, Save, AlertTriangle, BarChart3, Download, Upload, Eraser } from 'lucide-react';
 import { useProject, useUpdateProject, useDeleteProject, useBoard, useUpdateBoard, useIssues, useSprints } from '../hooks/useApi';
 import { useApp } from '../context/AppContext';
 import { showToast } from '../components/ui/Toast';
@@ -197,6 +197,74 @@ export function SettingsView() {
           </div>
         </section>
       )}
+
+      {/* Data Management */}
+      <section className="bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-[#8896A6] uppercase tracking-wider flex items-center gap-2">
+          <Download size={14} /> Data Management
+        </h2>
+        <p className="text-sm text-[#5A6578]">Export, import, or clear your project data.</p>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => {
+              try {
+                const keys = Object.keys(localStorage);
+                const data: Record<string, any> = {};
+                keys.forEach(k => {
+                  try { data[k] = JSON.parse(localStorage.getItem(k) || ''); } catch { data[k] = localStorage.getItem(k); }
+                });
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `canopy-export-${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('success', 'Data exported successfully');
+              } catch (err: any) { showToast('error', 'Export failed: ' + err.message); }
+            }}
+            className="flex items-center gap-2 bg-[#52796F] hover:bg-[#40916C] text-white rounded-md px-4 py-2 text-sm font-medium transition-all"
+          >
+            <Download size={16} /> Export All Data
+          </button>
+          <button
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = '.json';
+              input.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (!file) return;
+                try {
+                  const text = await file.text();
+                  const data = JSON.parse(text);
+                  Object.entries(data).forEach(([key, value]) => {
+                    localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+                  });
+                  showToast('success', 'Data imported successfully. Refreshing...');
+                  setTimeout(() => window.location.reload(), 1000);
+                } catch (err: any) { showToast('error', 'Import failed: ' + err.message); }
+              };
+              input.click();
+            }}
+            className="flex items-center gap-2 border border-[#E5E1DB] dark:border-[#3D4556] rounded-md px-4 py-2 text-sm font-medium text-[#5A6578] hover:bg-[#f0ede8] dark:hover:bg-[#1A1F2E] transition-colors"
+          >
+            <Upload size={16} /> Import Data
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Are you sure you want to clear ALL data? This cannot be undone.')) {
+                localStorage.clear();
+                showToast('success', 'All data cleared. Refreshing...');
+                setTimeout(() => window.location.reload(), 1000);
+              }
+            }}
+            className="flex items-center gap-2 border border-[#BC6C25]/50 rounded-md px-4 py-2 text-sm font-medium text-[#BC6C25] hover:bg-[#BC6C25]/10 transition-colors"
+          >
+            <Eraser size={16} /> Clear All Data
+          </button>
+        </div>
+      </section>
 
       <section className="bg-white dark:bg-[#242B3D] border border-[#BC6C25] rounded-lg p-6 space-y-4">
         <h2 className="text-sm font-semibold text-[#BC6C25] uppercase tracking-wider flex items-center gap-2">

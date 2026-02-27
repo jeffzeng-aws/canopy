@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FolderOpen, TreePine, ArrowRight, Columns3 } from 'lucide-react';
+import { Plus, FolderOpen, TreePine, ArrowRight, Columns3, CheckCircle2, Clock, AlertCircle, TrendingUp } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useApi';
 import { useApp } from '../context/AppContext';
 import { cn, formatDate } from '../lib/utils';
@@ -37,6 +37,13 @@ export function Dashboard() {
     }
   };
 
+  // Quick stats across all projects
+  const quickStats = useMemo(() => {
+    if (!projects || projects.length === 0) return null;
+    const total = projects.reduce((s, p) => s + (p.issueCounter || 0), 0);
+    return { totalIssues: total, projectCount: projects.length };
+  }, [projects]);
+
   const colors = ['#1B4332', '#2D6A4F', '#40916C', '#52796F', '#D4A373', '#BC6C25', '#9B59B6', '#2196F3'];
 
   if (isLoading && !isError) {
@@ -59,7 +66,7 @@ export function Dashboard() {
           <div className="w-24 h-24 bg-[#f0ede8] rounded-2xl flex items-center justify-center mb-6 animate-fade-in">
             <TreePine size={48} className="text-[#1B4332]" />
           </div>
-          <h1 className="text-3xl font-display font-bold text-[#2D3748] mb-3 animate-fade-in stagger-1" style={{ opacity: 0 }}>
+          <h1 className="text-3xl font-display font-bold text-[#2D3748] dark:text-[#E8ECF4] mb-3 animate-fade-in stagger-1" style={{ opacity: 0 }}>
             Welcome to Canopy
           </h1>
           <p className="text-[#5A6578] mb-8 max-w-md animate-fade-in stagger-2" style={{ opacity: 0 }}>
@@ -90,44 +97,90 @@ export function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((project, i) => (
-              <button
-                key={project.id}
-                onClick={() => {
-                  setCurrentProject(project.id);
-                  navigate(`/project/${project.id}/board`);
-                }}
-                className="group bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-5 text-left hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 animate-fade-in"
-                style={{ opacity: 0, animationDelay: `${i * 0.05}s` }}
-              >
-                <div className="flex items-start gap-3 mb-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                    style={{ background: project.color || '#52796F' }}
-                  >
-                    {project.icon || project.key[0]}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-display font-semibold text-[#2D3748] dark:text-[#E8ECF4] truncate group-hover:text-[#D4A373] transition-colors">
-                      {project.name}
-                    </h3>
-                    <p className="text-xs text-[#8896A6] font-mono">{project.key}</p>
-                  </div>
-                  <ArrowRight size={16} className="text-[#8896A6] opacity-0 group-hover:opacity-100 transition-opacity" />
+          {/* Quick Stats */}
+          {quickStats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1B4332]/10 flex items-center justify-center">
+                  <FolderOpen size={20} className="text-[#1B4332]" />
                 </div>
-                {project.description && (
-                  <p className="text-sm text-[#5A6578] line-clamp-2 mb-3">{project.description}</p>
-                )}
-                <div className="flex items-center gap-4 text-xs text-[#8896A6]">
-                  <span className="flex items-center gap-1">
-                    <Columns3 size={12} />
-                    {project.issueCounter} issues
-                  </span>
-                  <span>{formatDate(project.createdAt)}</span>
+                <div>
+                  <p className="text-2xl font-display font-bold text-[#2D3748] dark:text-[#E8ECF4]">{quickStats.projectCount}</p>
+                  <p className="text-xs text-[#8896A6]">Projects</p>
                 </div>
-              </button>
-            ))}
+              </div>
+              <div className="bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#2196F3]/10 flex items-center justify-center">
+                  <Columns3 size={20} className="text-[#2196F3]" />
+                </div>
+                <div>
+                  <p className="text-2xl font-display font-bold text-[#2D3748] dark:text-[#E8ECF4]">{quickStats.totalIssues}</p>
+                  <p className="text-xs text-[#8896A6]">Total Issues</p>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#40916C]/10 flex items-center justify-center">
+                  <TrendingUp size={20} className="text-[#40916C]" />
+                </div>
+                <div>
+                  <p className="text-2xl font-display font-bold text-[#40916C]">Active</p>
+                  <p className="text-xs text-[#8896A6]">Status</p>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#D4A373]/10 flex items-center justify-center">
+                  <Clock size={20} className="text-[#D4A373]" />
+                </div>
+                <div>
+                  <p className="text-2xl font-display font-bold text-[#D4A373]">{formatDate(new Date().toISOString())}</p>
+                  <p className="text-xs text-[#8896A6]">Today</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Recent Projects */}
+          <div>
+            <h2 className="text-sm font-semibold text-[#8896A6] uppercase tracking-wider mb-3">Recent Projects</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project, i) => (
+                <button
+                  key={project.id}
+                  onClick={() => {
+                    setCurrentProject(project.id);
+                    navigate(`/project/${project.id}/board`);
+                  }}
+                  className="group bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-5 text-left hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 animate-fade-in"
+                  style={{ opacity: 0, animationDelay: `${i * 0.05}s` }}
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+                      style={{ background: project.color || '#52796F' }}
+                    >
+                      {project.icon || project.key[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-display font-semibold text-[#2D3748] dark:text-[#E8ECF4] truncate group-hover:text-[#D4A373] transition-colors">
+                        {project.name}
+                      </h3>
+                      <p className="text-xs text-[#8896A6] font-mono">{project.key}</p>
+                    </div>
+                    <ArrowRight size={16} className="text-[#8896A6] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  {project.description && (
+                    <p className="text-sm text-[#5A6578] line-clamp-2 mb-3">{project.description}</p>
+                  )}
+                  <div className="flex items-center gap-4 text-xs text-[#8896A6]">
+                    <span className="flex items-center gap-1">
+                      <Columns3 size={12} />
+                      {project.issueCounter} issues
+                    </span>
+                    <span>{formatDate(project.createdAt)}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </>
       )}

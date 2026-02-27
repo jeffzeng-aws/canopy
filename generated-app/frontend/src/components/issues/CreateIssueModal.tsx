@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useCreateIssue, useSprints } from '../../hooks/useApi';
@@ -10,6 +10,7 @@ export function CreateIssueModal() {
   const { state, dispatch } = useApp();
   const createIssue = useCreateIssue();
   const { data: sprints } = useSprints(state.currentProjectId || undefined);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [summary, setSummary] = useState('');
   const [type, setType] = useState<string>('Task');
@@ -22,6 +23,18 @@ export function CreateIssueModal() {
   const [createAnother, setCreateAnother] = useState(false);
 
   const close = () => dispatch({ type: 'SET_CREATE_MODAL', payload: false });
+
+  // Cmd+Enter to submit
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        formRef.current?.requestSubmit();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +92,7 @@ export function CreateIssueModal() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-3">
             <div className="w-1/3">
               <label className="block text-xs font-medium text-[#5A6578] mb-1 uppercase tracking-wider">Type</label>
@@ -206,7 +219,7 @@ export function CreateIssueModal() {
               disabled={!summary.trim() || createIssue.isPending || !state.currentProjectId}
               className="flex-1 px-4 py-2 bg-[#D4A373] hover:bg-[#c49363] text-white rounded-md text-sm font-medium transition-all disabled:opacity-50"
             >
-              {createIssue.isPending ? 'Creating...' : 'Create'}
+              {createIssue.isPending ? 'Creating...' : <>Create <span className="text-xs opacity-60 ml-1">⌘↵</span></>}
             </button>
           </div>
         </form>
