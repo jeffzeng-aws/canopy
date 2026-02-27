@@ -123,22 +123,40 @@ export function BoardView() {
   const columnIssues = useMemo(() => {
     if (!issues) return {};
     const map: Record<string, Issue[]> = {};
+    // Track which issues have been placed to avoid duplicates
+    const placed = new Set<string>();
+
     columns.forEach(col => {
-      const catStatuses = col.statusCategory;
+      const colSlug = col.name.toLowerCase().replace(/ /g, '_');
       map[col.id] = issues.filter(issue => {
-        if (issue.status === col.name.toLowerCase().replace(/ /g, '_')) return true;
-        if (issue.status === col.statusCategory) return true;
-        if (col.statusCategory === 'todo' && issue.status === 'todo') return true;
-        if (col.statusCategory === 'in_progress' && (issue.status === 'in_progress' || issue.status === 'in_review')) {
-          if (col.name === 'In Progress' && issue.status === 'in_progress') return true;
-          if (col.name === 'In Review' && issue.status === 'in_review') return true;
-          if (col.name === 'In Progress' && issue.status !== 'in_review') return true;
-          return false;
+        if (placed.has(issue.id)) return false;
+
+        // Direct status match to column name slug
+        if (issue.status === colSlug) {
+          placed.add(issue.id);
+          return true;
         }
-        if (col.statusCategory === 'done' && issue.status === 'done') return true;
+
+        // Match by statusCategory only if no direct slug match found across all columns
+        // For 'in_progress' category with multiple columns, only match specific ones
+        if (col.statusCategory === 'in_progress') {
+          if (col.name === 'In Progress' && issue.status === 'in_progress') { placed.add(issue.id); return true; }
+          if (col.name === 'In Review' && issue.status === 'in_review') { placed.add(issue.id); return true; }
+        }
+        if (col.statusCategory === 'todo' && issue.status === 'todo' && colSlug === 'to_do') { placed.add(issue.id); return true; }
+        if (col.statusCategory === 'done' && issue.status === 'done' && colSlug === 'done') { placed.add(issue.id); return true; }
+
         return false;
       }).sort((a, b) => a.sortOrder - b.sortOrder);
     });
+
+    // Place any unmatched issues into the first column
+    const placedAll = new Set(Object.values(map).flat().map(i => i.id));
+    const unmatched = issues.filter(i => !placedAll.has(i.id));
+    if (unmatched.length > 0 && columns.length > 0) {
+      map[columns[0].id] = [...(map[columns[0].id] || []), ...unmatched];
+    }
+
     return map;
   }, [issues, columns]);
 
