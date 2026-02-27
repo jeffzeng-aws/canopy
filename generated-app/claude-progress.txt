@@ -2,7 +2,7 @@ CANOPY PROJECT MANAGEMENT APP - Progress Tracker
 ==================================================
 
 CURRENT STATUS: Phase 4 Polish Complete - Full-Featured App
-LAST UPDATED: 2026-02-27
+LAST UPDATED: 2026-02-27 (Session 3)
 
 COMPLETED:
 -----------
@@ -30,11 +30,11 @@ Phase 2b: Backend Lambda Handlers (Full)
 - DynamoDB helpers in backend/src/lib/db.ts
 - Compiles successfully: cd backend && npx tsc --noEmit
 
-Phase 3: Frontend (React + Vite + Tailwind CSS v4)
+Phase 3: Frontend (React 19 + Vite + Tailwind CSS v4)
 - All pages: Dashboard, BoardView, BacklogView, SprintsView, RoadmapView,
   ReportsView (Burndown, Velocity, SprintReport), SettingsView, LabelsView, ComponentsView
-- Components: TopNav, Sidebar (collapsible 240px/60px), AppLayout,
-  CreateIssueModal, IssueDetailPanel, SearchModal, Toast
+- Components: TopNav, Sidebar, AppLayout, CreateIssueModal, IssueDetailPanel,
+  SearchModal, Toast, KeyboardShortcuts, ErrorBoundary
 - API client with VITE_API_URL + full localStorage fallback
 - React Query hooks for all CRUD operations
 - AppContext: theme, sidebar, project, issue selection, modals
@@ -43,75 +43,85 @@ Phase 3: Frontend (React + Vite + Tailwind CSS v4)
   Space Grotesk + DM Sans + JetBrains Mono
 - Dark theme with proper class toggling
 - Stagger animations, shimmer skeletons, smooth transitions
-- Keyboard shortcuts: ⌘K search, ⌘[ sidebar, C create, Escape close
-- Build: ~384KB JS + ~35KB CSS
+- Keyboard shortcuts: ⌘K search, ⌘[ sidebar, C create, ? shortcuts, Esc close
+- Build: ~403KB JS + ~37KB CSS
 
 Phase 4: Polish (Complete)
-- Board column duplicate fix (placed tracking set)
-- Dark theme CSS enhancements (scrollbar, shimmer, focus rings)
-- RoadmapView: Gantt-style timeline with week/month headers, today marker,
-  epic expansion, bar visualization by issue type, Timeline/List view toggle
-- ReportsView: SVG-based burndown chart with animated lines and area fills,
-  velocity bar chart with gradient bars, status breakdown visualization,
-  issue type distribution in sprint reports
-- IssueDetailPanel: Sprint assignment dropdown, time tracking input,
-  backdrop overlay, delete confirmation, keyboard shortcut hint,
-  improved details layout with inline editing
-- BacklogView: Type and status filter dropdowns, sort by manual order/priority/
-  newest, filter badge count, active sprint highlighting with green border
-- Dashboard: Description field in project creation, click-outside-to-close
-- Sidebar: Fixed Labels/Components paths, improved active state matching
-- Labels management page with CRUD and color picker
-- Components management page with grid layout
+- ErrorBoundary component wrapping all routes
+- Comment system in IssueDetailPanel (add/list)
+- Connectivity indicator in TopNav (API/Local mode)
+- Board column duplicate fix, column point totals
+- Backlog: Move-to-sprint dropdown on issue rows
+- BacklogView: Type/status filters, sort by manual/priority/newest, no page reload
+- SprintsView: Inline editing (name/goal/dates), expandable issue list, date pickers
+- SearchModal: Keyboard navigation (↑↓ Enter Esc), status badges
+- RoadmapView: Gantt-style timeline, week/month headers, TODAY marker
+- ReportsView: SVG burndown/velocity charts, sprint report with stats
+- IssueDetailPanel: Sprint assignment, time tracking, inline editing, delete confirm
+- CreateIssueModal: No-project warning, description field
+- Dashboard: Description field, click-outside-to-close
+- Sidebar: Fixed routes, improved active state
+- KeyboardShortcuts dialog (? key)
+- Dark mode across all views
 - Accessibility: prefers-reduced-motion, focus-visible rings
-- E2E tests: 21/21 passing
 
 VERIFICATION RESULTS (all PASS):
 ---------------------------------
+Backend (5/5):
 - shared-schemas-compile: PASS
 - cdk-synth: PASS
 - cdk-tests (10/10): PASS
 - backend-compile: PASS
 - frontend-build: PASS
-- E2E tests (21/21): PASS
-- All screenshot verifications: no console errors
-- Dashboard: welcome page + project cards view
-- Board: correct column mapping, no duplicates
-- Backlog: sprint sections + filter controls
-- Sprints: active/planned sprints with progress bars
-- Settings: project config + board columns + danger zone
-- Burndown: SVG chart with stats cards and status breakdown
-- Roadmap: Gantt timeline with today marker and epic expansion
-- Labels: color-coded list with badge previews
-- Dark mode: proper theming across all views
+
+E2E Tests (23/23):
+- create-project: 3 tests
+- full-workflow: 4 tests
+- dark-mode: 3 tests
+- screenshot-helper: 6 tests
+- seed-screenshots: 5 tests
+- roadmap-screenshot: 2 tests
 
 CI/CD STATUS:
 --------------
 - SSM parameter /claude-code/infra/deploy-state: NOT FOUND (CI/CD not triggered)
+- Attempted direct cdk deploy: blocked by IAM (no CDK bootstrap access)
 - Frontend works fully with localStorage fallback
-- All code pushed to agent-runtime branch
+- All code pushed to agent-runtime branch (20 commits)
 - If CI/CD deploys: extract API URL from SSM, write to frontend/.env as VITE_API_URL
 
-COMMITS:
---------
-1. be11a1e: feat: add shared API contract, CDK infrastructure, and backend handlers
-2. f3c26c7: feat: add React frontend with full page structure and components
-3. 17821cb: feat: add localStorage fallback, init.sh, and e2e tests
-4. 9620a1e: fix: resolve duplicate issues in board columns and add screenshot tests
-5. 388b17a: feat: enhance dark theme and add CSS polish
-6. 267afb5: chore: update progress notes and add seed data helper
-7. 824bb53: feat: add Labels and Components management pages
-8. c6cb26c: feat: add accessibility CSS improvements
-9. 2f185b4: feat: enhance roadmap timeline, burndown charts, and issue detail panel
+COMMITS (20 total across 3 sessions):
+--------------------------------------
+Session 1:
+1. be11a1e: feat: add shared API contract with Zod schemas
+2. ca8e6a3: feat: add CDK infrastructure with stub handlers
+3. eec8ddb: feat: implement backend Lambda handlers
+4. 27cf0f1: feat: complete frontend with all views and API integration
+5. 9d14acb: feat: add comprehensive E2E test suite and visual verification
+6. 88bef3d: fix: dashboard welcome state and board column mapping
+7. c49bbfe: feat: add dark mode support with theme toggle
+8. c6cb26c: chore: update progress tracker
+
+Session 2:
+9. 2f185b4: feat: enhance roadmap timeline, burndown charts, issue detail panel
 10. 3d83aa1: feat: enhance backlog with filters/sorting, fix sidebar routes
 11. c2dd4a8: feat: add description field to project creation, improve modal UX
+12. 4f7501d: chore: add roadmap screenshot test
+13. e734575: feat: add keyboard navigation to search and sprint status badges
+14. 6fef6c1: feat: board column point totals
+15. dfc0a7d: feat: add keyboard shortcuts dialog
+
+Session 3:
+16. 4de4c8b: feat: add error boundary, comments, connectivity indicator
+17. b7344d7: fix: replace page reload with query invalidation, improve create modal
+18. 0682aff: feat: enhance sprints view with inline editing, date inputs
+19. de147b6: feat: add move-to-sprint action on backlog issues
 
 ARCHITECTURE:
 --------------
 generated-app/
 ├── package.json          (workspace root)
 ├── tsconfig.base.json
-├── init.sh               (quick start script)
 ├── shared/               (Zod schemas, types, endpoints - compiles OK)
 │   ├── schemas/          (project, issue, sprint, board, comment, search, common)
 │   ├── types.ts          (z.infer<> type exports)
@@ -131,9 +141,9 @@ generated-app/
 │       ├── hooks/useApi.ts       (React Query hooks)
 │       ├── context/AppContext.tsx (global state)
 │       ├── pages/                (11 page components)
-│       ├── components/           (layout, issues, board, search, ui)
+│       ├── components/           (layout, issues, search, ui)
 │       └── lib/utils.ts          (helpers)
-└── e2e-tests/            (Playwright tests - 21/21 pass)
+└── e2e-tests/            (Playwright tests - 23/23 pass)
 
 DynamoDB Single-Table Design:
 - PK/SK composite keys
@@ -154,6 +164,6 @@ WHAT'S LEFT (Nice-to-haves):
 -----------------------------
 - [ ] Wire VITE_API_URL once CI/CD deploys (if it ever triggers)
 - [ ] Verify deployed API endpoints with curl
-- [ ] Advanced JQL-style filtering
-- [ ] Keyboard shortcuts help modal (?)
-- [ ] More drag-and-drop in backlog for sprint planning
+- [ ] Real comment persistence via API
+- [ ] Drag-and-drop between sprint and backlog sections
+- [ ] Activity log / audit trail
