@@ -57,7 +57,7 @@ export function AppLayout() {
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-auto">
+        <main data-testid="main-content" className="flex-1 overflow-auto">
           <div className="max-w-[1400px] mx-auto p-6">
             <Outlet />
           </div>

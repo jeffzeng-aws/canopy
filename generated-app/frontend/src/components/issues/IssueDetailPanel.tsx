@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Clock, Zap, MessageSquare, Send } from 'lucide-react';
+import { X, Trash2, Clock, Zap, MessageSquare, Send, User, Tag, Calendar, Timer } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useIssue, useUpdateIssue, useDeleteIssue, useSprints, useAddComment } from '../../hooks/useApi';
 import { showToast } from '../ui/Toast';
@@ -105,7 +105,7 @@ export function IssueDetailPanel() {
         className="fixed inset-0 bg-black/10 z-30"
         onClick={close}
       />
-      <div className="fixed top-14 right-0 bottom-0 w-[680px] max-w-[calc(100vw-60px)] bg-white dark:bg-[#242B3D] shadow-[-4px_0_24px_rgba(0,0,0,0.12)] z-40 flex flex-col animate-slide-in-right overflow-hidden">
+      <div data-testid="issue-detail-panel" className="fixed top-14 right-0 bottom-0 w-[680px] max-w-[calc(100vw-60px)] bg-white dark:bg-[#242B3D] shadow-[-4px_0_24px_rgba(0,0,0,0.12)] z-40 flex flex-col animate-slide-in-right overflow-hidden">
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-[#D4A373] border-t-transparent rounded-full animate-spin" />
@@ -270,11 +270,67 @@ export function IssueDetailPanel() {
                     </select>
                   </div>
 
+                  {/* Assignee */}
+                  <div className="flex items-center px-4 py-2.5">
+                    <span className="text-xs text-[#8896A6] w-28 flex items-center gap-1"><User size={10} /> Assignee</span>
+                    <input
+                      type="text"
+                      value={issue.assigneeId || ''}
+                      onChange={e => handleUpdateField('assigneeId', e.target.value || undefined)}
+                      placeholder="Unassigned"
+                      className="flex-1 px-2 py-1 rounded text-sm bg-transparent border-0 dark:text-[#E8ECF4] focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Labels */}
+                  <div className="flex items-center px-4 py-2.5">
+                    <span className="text-xs text-[#8896A6] w-28 flex items-center gap-1"><Tag size={10} /> Labels</span>
+                    <div className="flex-1 flex flex-wrap gap-1">
+                      {issue.labels && issue.labels.length > 0 ? (
+                        issue.labels.map((label: string) => (
+                          <span key={label} className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-[#D4A373]/15 text-[#D4A373]">
+                            {label}
+                            <button onClick={() => handleUpdateField('labels', issue.labels.filter((l: string) => l !== label))} className="ml-0.5 hover:text-[#BC6C25]">×</button>
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-[#c4c0b8]">No labels</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Due Date */}
+                  <div className="flex items-center px-4 py-2.5">
+                    <span className="text-xs text-[#8896A6] w-28 flex items-center gap-1"><Calendar size={10} /> Due Date</span>
+                    <input
+                      type="date"
+                      value={issue.dueDate ? new Date(issue.dueDate).toISOString().slice(0, 10) : ''}
+                      onChange={e => handleUpdateField('dueDate', e.target.value ? new Date(e.target.value).toISOString() : undefined)}
+                      className="flex-1 px-2 py-1 rounded text-sm bg-transparent border-0 dark:text-[#E8ECF4] focus:outline-none cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Time Estimate */}
+                  <div className="flex items-center px-4 py-2.5">
+                    <span className="text-xs text-[#8896A6] w-28 flex items-center gap-1"><Timer size={10} /> Estimate</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={issue.timeEstimate ?? ''}
+                        onChange={e => handleUpdateField('timeEstimate', e.target.value ? parseInt(e.target.value) : undefined)}
+                        min="0"
+                        step="15"
+                        placeholder="—"
+                        className="w-20 px-2 py-1 rounded text-sm bg-transparent border-0 dark:text-[#E8ECF4] focus:outline-none"
+                      />
+                      <span className="text-xs text-[#8896A6]">min</span>
+                    </div>
+                  </div>
+
                   {/* Time Tracking */}
                   <div className="flex items-center px-4 py-2.5">
-                    <span className="text-xs text-[#8896A6] w-28">Time Spent</span>
+                    <span className="text-xs text-[#8896A6] w-28 flex items-center gap-1"><Clock size={10} /> Time Spent</span>
                     <div className="flex items-center gap-2">
-                      <Clock size={12} className="text-[#8896A6]" />
                       <input
                         type="number"
                         value={issue.timeSpent ?? ''}

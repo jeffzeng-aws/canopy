@@ -17,6 +17,8 @@ export function CreateIssueModal() {
   const [description, setDescription] = useState('');
   const [sprintId, setSprintId] = useState('');
   const [storyPoints, setStoryPoints] = useState('');
+  const [labels, setLabels] = useState('');
+  const [dueDate, setDueDate] = useState('');
   const [createAnother, setCreateAnother] = useState(false);
 
   const close = () => dispatch({ type: 'SET_CREATE_MODAL', payload: false });
@@ -35,6 +37,8 @@ export function CreateIssueModal() {
           priority: priority as Priority,
           sprintId: sprintId || undefined,
           storyPoints: storyPoints ? parseFloat(storyPoints) : undefined,
+          labels: labels ? labels.split(',').map(l => l.trim()).filter(Boolean) : undefined,
+          dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
         },
       });
       showToast('success', 'Issue created successfully');
@@ -42,6 +46,8 @@ export function CreateIssueModal() {
         setSummary('');
         setDescription('');
         setStoryPoints('');
+        setLabels('');
+        setDueDate('');
       } else {
         close();
       }
@@ -54,8 +60,9 @@ export function CreateIssueModal() {
   const priorities = ['Highest', 'High', 'Medium', 'Low', 'Lowest'] as const;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in" onClick={close}>
+    <div data-testid="create-issue-modal-overlay" className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in" onClick={close}>
       <div
+        data-testid="create-issue-modal"
         className="bg-white dark:bg-[#242B3D] rounded-xl shadow-2xl w-full max-w-lg p-6 animate-scale-in max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
@@ -147,6 +154,29 @@ export function CreateIssueModal() {
                 min="0.5"
                 max="100"
                 step="0.5"
+                className="w-full px-3 py-2 border border-[#E5E1DB] rounded-md text-sm focus:outline-none focus:border-[#D4A373] dark:bg-[#1A1F2E] dark:border-[#3D4556] dark:text-[#E8ECF4]"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-[#5A6578] mb-1 uppercase tracking-wider">Labels</label>
+              <input
+                type="text"
+                value={labels}
+                onChange={e => setLabels(e.target.value)}
+                placeholder="bug, frontend, urgent"
+                className="w-full px-3 py-2 border border-[#E5E1DB] rounded-md text-sm focus:outline-none focus:border-[#D4A373] dark:bg-[#1A1F2E] dark:border-[#3D4556] dark:text-[#E8ECF4]"
+              />
+              <p className="text-[10px] text-[#8896A6] mt-0.5">Comma-separated</p>
+            </div>
+            <div className="w-40">
+              <label className="block text-xs font-medium text-[#5A6578] mb-1 uppercase tracking-wider">Due Date</label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
                 className="w-full px-3 py-2 border border-[#E5E1DB] rounded-md text-sm focus:outline-none focus:border-[#D4A373] dark:bg-[#1A1F2E] dark:border-[#3D4556] dark:text-[#E8ECF4]"
               />
             </div>

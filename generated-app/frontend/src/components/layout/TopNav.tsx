@@ -42,7 +42,7 @@ export function TopNav() {
   }, []);
 
   return (
-    <header className="h-14 bg-[#1B4332] text-white flex items-center px-4 gap-4 sticky top-0 z-50 shadow-md">
+    <header data-testid="top-nav" className="h-14 bg-[#1B4332] text-white flex items-center px-4 gap-4 sticky top-0 z-50 shadow-md">
       <button
         onClick={toggleSidebar}
         className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
@@ -60,6 +60,7 @@ export function TopNav() {
       </div>
 
       <button
+        data-testid="search-btn"
         onClick={() => toggleSearch()}
         className="flex items-center gap-2 bg-white/10 hover:bg-white/15 rounded-md px-3 py-1.5 text-sm text-white/70 transition-colors flex-1 max-w-md"
       >
@@ -124,6 +125,7 @@ export function TopNav() {
       </div>
 
       <button
+        data-testid="create-issue-btn"
         onClick={() => toggleCreateModal()}
         className="flex items-center gap-1.5 bg-[#D4A373] hover:bg-[#c49363] text-white rounded-md px-3 py-1.5 text-sm font-medium transition-all hover:shadow-md active:scale-[0.98]"
       >
@@ -142,6 +144,7 @@ export function TopNav() {
           </span>
         )}
         <button
+          data-testid="theme-toggle"
           onClick={() => setTheme(state.theme === 'light' ? 'dark' : 'light')}
           className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
           title="Toggle theme"

@@ -44,10 +44,12 @@ export function Sidebar() {
 
   return (
     <aside
+      data-testid="sidebar"
       className={cn(
         'h-[calc(100vh-56px)] bg-[#F5F3EF] border-r border-[#E5E1DB] flex flex-col transition-all duration-200 ease-in-out overflow-hidden',
         'dark:bg-[#151922] dark:border-[#3D4556]',
-        collapsed ? 'w-[60px]' : 'w-[240px]'
+        collapsed ? 'w-[60px]' : 'w-[240px]',
+        collapsed && 'collapsed'
       )}
     >
       <div className="flex-1 overflow-y-auto py-2">
@@ -117,6 +119,7 @@ export function Sidebar() {
           {!collapsed && <span>All Projects</span>}
         </button>
         <button
+          data-testid="sidebar-toggle"
           onClick={toggleSidebar}
           className={cn(
             'w-full flex items-center gap-3 px-4 py-2 text-sm text-[#8896A6] hover:bg-[#f0ede8] rounded-md transition-colors',
