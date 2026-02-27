@@ -94,9 +94,25 @@ export function SprintsView() {
                   <span>{sprintIssues.length} issues</span>
                   <span>{donePts}/{totalPts} story points</span>
                   {sprint.startDate && <span><Calendar size={12} className="inline mr-1" />{formatDate(sprint.startDate)}</span>}
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    {Object.entries(
+                      sprintIssues.reduce<Record<string, number>>((acc, i) => {
+                        acc[i.status] = (acc[i.status] || 0) + 1;
+                        return acc;
+                      }, {})
+                    ).map(([status, count]) => (
+                      <span
+                        key={status}
+                        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                        style={{ color: statusConfig[status]?.color, backgroundColor: statusConfig[status]?.bg }}
+                      >
+                        {statusConfig[status]?.label || status} {count}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="w-full bg-[#f0ede8] rounded-full h-2">
-                  <div className="bg-[#40916C] h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                <div className="w-full bg-[#f0ede8] dark:bg-[#1A1F2E] rounded-full h-2.5">
+                  <div className="bg-gradient-to-r from-[#40916C] to-[#2D6A4F] h-2.5 rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
                 </div>
               </div>
             );
