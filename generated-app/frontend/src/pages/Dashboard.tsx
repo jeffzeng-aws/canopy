@@ -13,6 +13,7 @@ export function Dashboard() {
   const [newName, setNewName] = React.useState('');
   const [newKey, setNewKey] = React.useState('');
   const [newColor, setNewColor] = React.useState('#1B4332');
+  const [newDescription, setNewDescription] = React.useState('');
 
   const createProject = useCreateProject();
 
@@ -23,12 +24,14 @@ export function Dashboard() {
         name: newName,
         key: newKey.toUpperCase(),
         color: newColor,
+        description: newDescription || undefined,
       });
       setCurrentProject(proj.id);
       navigate(`/project/${proj.id}/board`);
       setShowCreate(false);
       setNewName('');
       setNewKey('');
+      setNewDescription('');
     } catch (err: any) {
       console.error('Failed to create project:', err);
     }
@@ -130,8 +133,8 @@ export function Dashboard() {
       )}
 
       {showCreate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white dark:bg-[#242B3D] rounded-xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowCreate(false)}>
+          <div className="bg-white dark:bg-[#242B3D] rounded-xl shadow-2xl w-full max-w-md p-6 animate-scale-in" onClick={e => e.stopPropagation()}>
             <h2 className="text-xl font-display font-bold text-[#2D3748] dark:text-[#E8ECF4] mb-6">Create Project</h2>
 
             <div className="space-y-4">
@@ -160,6 +163,17 @@ export function Dashboard() {
                   onChange={e => setNewKey(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 10))}
                   placeholder="KEY"
                   className="w-full px-3 py-2 border border-[#E5E1DB] rounded-md text-sm font-mono focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/20 dark:bg-[#1A1F2E] dark:border-[#3D4556] dark:text-[#E8ECF4]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#5A6578] mb-1">Description <span className="text-[#8896A6] font-normal">(optional)</span></label>
+                <textarea
+                  value={newDescription}
+                  onChange={e => setNewDescription(e.target.value)}
+                  placeholder="What is this project about?"
+                  rows={2}
+                  className="w-full px-3 py-2 border border-[#E5E1DB] rounded-md text-sm focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/20 resize-none dark:bg-[#1A1F2E] dark:border-[#3D4556] dark:text-[#E8ECF4]"
                 />
               </div>
 
