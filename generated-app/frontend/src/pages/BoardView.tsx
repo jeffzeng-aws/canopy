@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { DndContext, DragOverlay, closestCorners, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Plus, Search } from 'lucide-react';
@@ -112,6 +112,11 @@ export function BoardView() {
   const { selectIssue, toggleCreateModal, setCurrentProject } = useApp();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [quickFilter, setQuickFilter] = useState('');
+
+  // Require 8px of movement before starting a drag (allows clicks to pass through)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
 
   React.useEffect(() => {
     if (projectId) setCurrentProject(projectId);
@@ -257,7 +262,7 @@ export function BoardView() {
         </button>
       </div>
 
-      <DndContext collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {columns.map((col, i) => (
             <div key={col.id} className="animate-fade-in" style={{ opacity: 0, animationDelay: `${i * 0.1}s` }}>
