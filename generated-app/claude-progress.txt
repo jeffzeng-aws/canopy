@@ -1,0 +1,69 @@
+CANOPY PROJECT MANAGEMENT APP - Progress Tracker
+==================================================
+
+CURRENT STATUS: Phase 2a complete, committing infrastructure + shared + backend stubs
+LAST UPDATED: 2026-02-27
+
+COMPLETED:
+-----------
+Phase 0: Monorepo Restructuring
+- Root package.json with workspaces: [shared, backend, frontend, infrastructure]
+- tsconfig.base.json with shared TypeScript config
+- All workspace directories created
+
+Phase 1: Shared Contract (@canopy/shared)
+- All Zod schemas written (common, project, issue, sprint, board, comment, search)
+- Types file with z.infer<> type exports
+- Endpoints route map
+- Compiles successfully: cd shared && npx tsc --noEmit
+
+Phase 2a: CDK Infrastructure
+- Stack: DynamoDB (single-table + 3 GSIs), Lambda (NodejsFunction), API Gateway HTTP API, S3+CloudFront
+- All resources prefixed with canopy-
+- CDK tests: 10/10 passing (snapshot + assertion tests)
+- CDK synth: produces valid CloudFormation template
+- Outputs: ApiUrl, FrontendBucketName, DistributionId, DistributionDomain
+
+Phase 2b: Backend Lambda Handlers (Full)
+- Router in backend/src/index.ts with pattern matching
+- Full CRUD handlers: projects, issues, sprints, boards, comments, search
+- DynamoDB helpers in backend/src/lib/db.ts
+- Compiles successfully: cd backend && npx tsc --noEmit
+
+IN PROGRESS:
+------------
+- Need to commit and push to trigger CI/CD deployment
+- After deployment: wire frontend to API URL
+
+NEXT STEPS:
+-----------
+1. Commit shared+infra+backend and push
+2. Wait for CI/CD deployment
+3. Create frontend package with API wiring
+4. Build all UI pages (board, backlog, sprint, reports, etc.)
+5. Integration testing and polish
+
+ARCHITECTURE:
+--------------
+generated-app/
+├── package.json          (workspace root)
+├── tsconfig.base.json
+├── shared/               (Zod schemas, types, endpoints - compiles OK)
+├── backend/              (Lambda handler with routing - compiles OK)
+├── infrastructure/       (CDK stack - synths OK, 10/10 tests pass)
+└── frontend/             (TO DO - will be created in Phase 3)
+
+DynamoDB Single-Table Design:
+- PK/SK composite keys
+- GSI1: project queries (PROJ#id -> ISSUE#status#order, SPRINT#status#time)
+- GSI2: assignee queries (USER#id -> updatedAt)
+- GSI3: sprint queries (SPRINT#id -> sortOrder)
+
+API Routes (Lambda router):
+- POST/GET /projects, GET/PUT/DELETE /projects/:id
+- POST/GET /projects/:id/issues
+- GET/PUT/DELETE /issues/:id, PUT /issues/bulk
+- POST /issues/:id/comments
+- POST/GET /projects/:id/sprints, PUT /sprints/:id
+- GET /projects/:id/board, PUT /boards/:id
+- GET /search

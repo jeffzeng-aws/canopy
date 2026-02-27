@@ -1,0 +1,17 @@
+{
+  "name": "canopy",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend",
+    "infrastructure"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "test:shared": "cd shared && npx tsc --noEmit",
+    "test:infra": "cd infrastructure && npm test",
+    "test:all": "npm run test:shared && npm run test:infra"
+  }
+}

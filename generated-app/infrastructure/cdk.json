@@ -1,0 +1,6 @@
+{
+  "app": "npx tsx bin/canopy.ts",
+  "context": {
+    "@aws-cdk/core:stackRelativeExports": true
+  }
+}
