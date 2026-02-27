@@ -49,6 +49,29 @@ export function formatDate(dateStr: string | undefined): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+export function formatRelativeTime(dateStr: string | undefined): string {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHrs = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHrs / 24);
+
+  if (diffSec < 60) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  if (diffDays === 1) return 'yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: now.getFullYear() !== date.getFullYear() ? 'numeric' : undefined });
+}
+
+export function pluralize(count: number, singular: string, plural?: string): string {
+  return `${count} ${count === 1 ? singular : (plural || singular + 's')}`;
+}
+
 export function generateColor(str: string): string {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
