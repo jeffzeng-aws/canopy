@@ -146,6 +146,18 @@ export function useUpdateBoard() {
   });
 }
 
+// Comments
+export function useAddComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ issueId, body }: { issueId: string; body: string }) =>
+      api.comments.add(issueId, { body }),
+    onSuccess: (_, { issueId }) => {
+      qc.invalidateQueries({ queryKey: ['comments', issueId] });
+    },
+  });
+}
+
 // Search
 export function useSearch(query: string, projectId?: string) {
   return useQuery({

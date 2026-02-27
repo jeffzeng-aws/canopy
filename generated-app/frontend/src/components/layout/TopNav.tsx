@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Plus, Moon, Sun, TreePine, Menu } from 'lucide-react';
+import { Search, Plus, Moon, Sun, TreePine, Menu, HardDrive, Cloud } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useProjects } from '../../hooks/useApi';
 import { useNavigate } from 'react-router-dom';
@@ -131,13 +131,24 @@ export function TopNav() {
         <span className="hidden sm:inline">Create</span>
       </button>
 
-      <button
-        onClick={() => setTheme(state.theme === 'light' ? 'dark' : 'light')}
-        className="p-1.5 hover:bg-white/10 rounded-md transition-colors ml-auto"
-        title="Toggle theme"
-      >
-        {state.theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-      </button>
+      <div className="ml-auto flex items-center gap-1">
+        {import.meta.env.VITE_API_URL ? (
+          <span className="flex items-center gap-1 text-[10px] text-white/40 px-2 py-1 bg-white/5 rounded" title="Connected to API">
+            <Cloud size={12} className="text-[#40916C]" /> API
+          </span>
+        ) : (
+          <span className="flex items-center gap-1 text-[10px] text-white/40 px-2 py-1 bg-white/5 rounded" title="Using local storage">
+            <HardDrive size={12} /> Local
+          </span>
+        )}
+        <button
+          onClick={() => setTheme(state.theme === 'light' ? 'dark' : 'light')}
+          className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+          title="Toggle theme"
+        >
+          {state.theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
+      </div>
     </header>
   );
 }
