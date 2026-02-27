@@ -8,6 +8,8 @@ import { SprintsView } from './pages/SprintsView';
 import { RoadmapView } from './pages/RoadmapView';
 import { BurndownView, VelocityView, SprintReportView } from './pages/ReportsView';
 import { SettingsView } from './pages/SettingsView';
+import { LabelsView } from './pages/LabelsView';
+import { ComponentsView } from './pages/ComponentsView';
 
 export function App() {
   return (
@@ -21,6 +23,8 @@ export function App() {
         <Route path="/project/:projectId/reports/burndown" element={<BurndownView />} />
         <Route path="/project/:projectId/reports/velocity" element={<VelocityView />} />
         <Route path="/project/:projectId/reports/sprint" element={<SprintReportView />} />
+        <Route path="/project/:projectId/labels" element={<LabelsView />} />
+        <Route path="/project/:projectId/components" element={<ComponentsView />} />
         <Route path="/project/:projectId/settings" element={<SettingsView />} />
         <Route path="/project/:projectId/settings/*" element={<SettingsView />} />
         <Route path="*" element={<Navigate to="/" replace />} />
