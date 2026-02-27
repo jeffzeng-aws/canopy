@@ -66,6 +66,12 @@ export function CreateIssueModal() {
           </button>
         </div>
 
+        {!state.currentProjectId && (
+          <div className="mb-4 p-3 bg-[#BC6C25]/10 border border-[#BC6C25]/20 rounded-lg">
+            <p className="text-sm text-[#BC6C25]">Please select a project first to create an issue.</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-3">
             <div className="w-1/3">
@@ -167,7 +173,7 @@ export function CreateIssueModal() {
             </button>
             <button
               type="submit"
-              disabled={!summary.trim() || createIssue.isPending}
+              disabled={!summary.trim() || createIssue.isPending || !state.currentProjectId}
               className="flex-1 px-4 py-2 bg-[#D4A373] hover:bg-[#c49363] text-white rounded-md text-sm font-medium transition-all disabled:opacity-50"
             >
               {createIssue.isPending ? 'Creating...' : 'Create'}

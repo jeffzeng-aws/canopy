@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Search, GripVertical, ChevronDown, ChevronRight, Filter, ArrowUpDown } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useIssues, useSprints, useUpdateIssue, useCreateSprint } from '../hooks/useApi';
 import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
@@ -136,6 +137,7 @@ export function BacklogView() {
   const { selectIssue, toggleCreateModal, setCurrentProject } = useApp();
   const updateIssue = useUpdateIssue();
   const createSprintMutation = useCreateSprint();
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -187,7 +189,8 @@ export function BacklogView() {
     try {
       await api.sprints.update(id, data);
       showToast('success', data.status === 'active' ? 'Sprint started!' : 'Sprint completed!');
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['issues'] });
     } catch (err: any) {
       showToast('error', err.message);
     }
