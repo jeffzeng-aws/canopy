@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Search, GripVertical, ChevronDown, ChevronRight, Filter, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, GripVertical, ChevronDown, ChevronRight, Filter, ArrowUpDown, MoveRight } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useIssues, useSprints, useUpdateIssue, useCreateSprint } from '../hooks/useApi';
 import { api } from '../api/client';
@@ -9,18 +9,42 @@ import { issueTypeConfig, priorityConfig, statusConfig, cn, formatDate } from '.
 import { showToast } from '../components/ui/Toast';
 import type { Issue, Sprint } from '@canopy/shared';
 
-function IssueRow({ issue, onClick }: { issue: Issue; onClick: () => void }) {
+function IssueRow({
+  issue,
+  onClick,
+  sprints,
+  onMoveSprint,
+}: {
+  issue: Issue;
+  onClick: () => void;
+  sprints?: Sprint[];
+  onMoveSprint?: (issueId: string, sprintId: string | undefined) => void;
+}) {
+  const [showMoveMenu, setShowMoveMenu] = useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMoveMenu(false);
+      }
+    }
+    if (showMoveMenu) {
+      document.addEventListener('mousedown', handleClick);
+      return () => document.removeEventListener('mousedown', handleClick);
+    }
+  }, [showMoveMenu]);
+
   return (
     <div
-      onClick={onClick}
-      className="flex items-center gap-3 px-3 py-2.5 hover:bg-[#f0ede8] dark:hover:bg-[#2a3144] cursor-pointer border-b border-[#E5E1DB]/50 dark:border-[#3D4556]/50 transition-colors group"
+      className="flex items-center gap-3 px-3 py-2.5 hover:bg-[#f0ede8] dark:hover:bg-[#2a3144] cursor-pointer border-b border-[#E5E1DB]/50 dark:border-[#3D4556]/50 transition-colors group relative"
     >
       <GripVertical size={14} className="text-[#c4c0b8] opacity-0 group-hover:opacity-100 transition-opacity cursor-grab flex-shrink-0" />
-      <span style={{ color: issueTypeConfig[issue.type]?.color }} className="text-sm flex-shrink-0" title={issue.type}>
+      <span style={{ color: issueTypeConfig[issue.type]?.color }} className="text-sm flex-shrink-0" title={issue.type} onClick={onClick}>
         {issueTypeConfig[issue.type]?.icon}
       </span>
-      <span className="text-xs font-mono text-[#8896A6] w-16 flex-shrink-0">{issue.key}</span>
-      <span className="text-sm text-[#2D3748] dark:text-[#E8ECF4] flex-1 truncate group-hover:text-[#D4A373] transition-colors">
+      <span className="text-xs font-mono text-[#8896A6] w-16 flex-shrink-0" onClick={onClick}>{issue.key}</span>
+      <span className="text-sm text-[#2D3748] dark:text-[#E8ECF4] flex-1 truncate group-hover:text-[#D4A373] transition-colors" onClick={onClick}>
         {issue.summary}
       </span>
       <span
@@ -37,6 +61,45 @@ function IssueRow({ issue, onClick }: { issue: Issue; onClick: () => void }) {
       <span className="text-xs flex-shrink-0 w-5 text-center" style={{ color: priorityConfig[issue.priority]?.color }} title={issue.priority}>
         {priorityConfig[issue.priority]?.icon}
       </span>
+
+      {/* Move to sprint button */}
+      {onMoveSprint && sprints && sprints.length > 0 && (
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={e => { e.stopPropagation(); setShowMoveMenu(!showMoveMenu); }}
+            className="p-1 text-[#8896A6] hover:text-[#D4A373] opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+            title="Move to sprint"
+          >
+            <MoveRight size={14} />
+          </button>
+          {showMoveMenu && (
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg shadow-lg z-20 overflow-hidden animate-scale-in">
+              {!issue.sprintId ? null : (
+                <button
+                  onClick={e => { e.stopPropagation(); onMoveSprint(issue.id, undefined); setShowMoveMenu(false); }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-[#f0ede8] dark:hover:bg-[#2a3144] text-[#5A6578] dark:text-[#A0AEC0] transition-colors"
+                >
+                  Move to Backlog
+                </button>
+              )}
+              {sprints.filter(s => s.status !== 'completed' && s.id !== issue.sprintId).map(s => (
+                <button
+                  key={s.id}
+                  onClick={e => { e.stopPropagation(); onMoveSprint(issue.id, s.id); setShowMoveMenu(false); }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-[#f0ede8] dark:hover:bg-[#2a3144] text-[#5A6578] dark:text-[#A0AEC0] transition-colors flex items-center gap-2"
+                >
+                  <span className={cn(
+                    "w-2 h-2 rounded-full",
+                    s.status === 'active' ? "bg-[#40916C]" : "bg-[#8896A6]"
+                  )} />
+                  {s.name}
+                  {s.status === 'active' && <span className="text-[10px] text-[#40916C]">●</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -46,11 +109,15 @@ function SprintSection({
   issues,
   onIssueClick,
   onUpdateSprint,
+  sprints,
+  onMoveSprint,
 }: {
   sprint: Sprint;
   issues: Issue[];
   onIssueClick: (id: string) => void;
   onUpdateSprint: (id: string, data: any) => void;
+  sprints?: Sprint[];
+  onMoveSprint?: (issueId: string, sprintId: string | undefined) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const totalPoints = issues.reduce((sum, i) => sum + (i.storyPoints || 0), 0);
@@ -117,11 +184,11 @@ function SprintSection({
       {!collapsed && (
         <div className="bg-white dark:bg-[#242B3D]">
           {issues.map(issue => (
-            <IssueRow key={issue.id} issue={issue} onClick={() => onIssueClick(issue.id)} />
+            <IssueRow key={issue.id} issue={issue} onClick={() => onIssueClick(issue.id)} sprints={sprints} onMoveSprint={onMoveSprint} />
           ))}
           {issues.length === 0 && (
             <div className="px-4 py-6 text-center text-sm text-[#8896A6]">
-              No issues in this sprint. Drag issues here to plan.
+              No issues in this sprint. Move issues here from the backlog.
             </div>
           )}
         </div>
@@ -202,6 +269,15 @@ export function BacklogView() {
     try {
       await createSprintMutation.mutateAsync({ projectId, data: { name } });
       showToast('success', 'Sprint created');
+    } catch (err: any) {
+      showToast('error', err.message);
+    }
+  };
+
+  const handleMoveSprint = async (issueId: string, sprintId: string | undefined) => {
+    try {
+      await updateIssue.mutateAsync({ id: issueId, data: { sprintId: sprintId || (undefined as any) } });
+      showToast('success', sprintId ? 'Moved to sprint' : 'Moved to backlog');
     } catch (err: any) {
       showToast('error', err.message);
     }
@@ -340,6 +416,8 @@ export function BacklogView() {
           issues={sprintIssues[sprint.id] || []}
           onIssueClick={id => selectIssue(id)}
           onUpdateSprint={handleUpdateSprint}
+          sprints={sprints}
+          onMoveSprint={handleMoveSprint}
         />
       ))}
 
@@ -352,7 +430,7 @@ export function BacklogView() {
         </div>
         <div>
           {backlogIssues.map(issue => (
-            <IssueRow key={issue.id} issue={issue} onClick={() => selectIssue(issue.id)} />
+            <IssueRow key={issue.id} issue={issue} onClick={() => selectIssue(issue.id)} sprints={sprints} onMoveSprint={handleMoveSprint} />
           ))}
           {backlogIssues.length === 0 && filteredIssues.length > 0 && (
             <div className="px-4 py-8 text-center">
