@@ -66,7 +66,7 @@ function BoardColumn({
   const statusColor = statusConfig[column.name.toLowerCase().replace(/ /g, '_')]?.color || column.color || '#8896A6';
 
   return (
-    <div className="flex-shrink-0 w-[300px] flex flex-col bg-[#f5f3ef] dark:bg-[#1A1F2E] rounded-lg">
+    <div className="flex-shrink-0 w-[300px] flex flex-col bg-[#f5f3ef] dark:bg-[#1E2536] rounded-lg">
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[#E5E1DB] dark:border-[#3D4556]">
         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: statusColor }} />
         <h3 className="text-sm font-display font-semibold text-[#2D3748] dark:text-[#E8ECF4]">{column.name}</h3>

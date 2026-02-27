@@ -147,3 +147,42 @@ code, pre, .font-mono {
 .dark ::-webkit-scrollbar-thumb {
   background: #3D4556;
 }
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4D5566;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(90deg, #242B3D 25%, #2D3548 50%, #242B3D 75%);
+  background-size: 200% 100%;
+}
+
+/* Smooth transitions on theme change */
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Focus ring style */
+*:focus-visible {
+  outline: 2px solid #D4A373;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
