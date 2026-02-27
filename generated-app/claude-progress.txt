@@ -1,7 +1,7 @@
 CANOPY PROJECT MANAGEMENT APP - Progress Tracker
 ==================================================
 
-CURRENT STATUS: Phase 3 Complete, Phase 4 Polish In Progress
+CURRENT STATUS: Phase 4 Polish Complete - Full-Featured App
 LAST UPDATED: 2026-02-27
 
 COMPLETED:
@@ -32,7 +32,7 @@ Phase 2b: Backend Lambda Handlers (Full)
 
 Phase 3: Frontend (React + Vite + Tailwind CSS v4)
 - All pages: Dashboard, BoardView, BacklogView, SprintsView, RoadmapView,
-  ReportsView (Burndown, Velocity, SprintReport), SettingsView
+  ReportsView (Burndown, Velocity, SprintReport), SettingsView, LabelsView, ComponentsView
 - Components: TopNav, Sidebar (collapsible 240px/60px), AppLayout,
   CreateIssueModal, IssueDetailPanel, SearchModal, Toast
 - API client with VITE_API_URL + full localStorage fallback
@@ -44,12 +44,27 @@ Phase 3: Frontend (React + Vite + Tailwind CSS v4)
 - Dark theme with proper class toggling
 - Stagger animations, shimmer skeletons, smooth transitions
 - Keyboard shortcuts: ⌘K search, ⌘[ sidebar, C create, Escape close
-- Build: ~347KB JS + ~31KB CSS
+- Build: ~384KB JS + ~35KB CSS
 
-Phase 4 (In Progress): Polish
+Phase 4: Polish (Complete)
 - Board column duplicate fix (placed tracking set)
 - Dark theme CSS enhancements (scrollbar, shimmer, focus rings)
-- E2E tests: 7/7 passing (create project, board, backlog, sprints, settings)
+- RoadmapView: Gantt-style timeline with week/month headers, today marker,
+  epic expansion, bar visualization by issue type, Timeline/List view toggle
+- ReportsView: SVG-based burndown chart with animated lines and area fills,
+  velocity bar chart with gradient bars, status breakdown visualization,
+  issue type distribution in sprint reports
+- IssueDetailPanel: Sprint assignment dropdown, time tracking input,
+  backdrop overlay, delete confirmation, keyboard shortcut hint,
+  improved details layout with inline editing
+- BacklogView: Type and status filter dropdowns, sort by manual order/priority/
+  newest, filter badge count, active sprint highlighting with green border
+- Dashboard: Description field in project creation, click-outside-to-close
+- Sidebar: Fixed Labels/Components paths, improved active state matching
+- Labels management page with CRUD and color picker
+- Components management page with grid layout
+- Accessibility: prefers-reduced-motion, focus-visible rings
+- E2E tests: 21/21 passing
 
 VERIFICATION RESULTS (all PASS):
 ---------------------------------
@@ -58,19 +73,24 @@ VERIFICATION RESULTS (all PASS):
 - cdk-tests (10/10): PASS
 - backend-compile: PASS
 - frontend-build: PASS
-- E2E tests (7/7): PASS
-- Dashboard screenshot: no console errors
-- Board screenshot: correct column mapping
-- Backlog screenshot: sprint sections + backlog section
-- Sprints screenshot: active/planned sprints
-- Settings screenshot: project config + danger zone
-- Burndown screenshot: progress stats
+- E2E tests (21/21): PASS
+- All screenshot verifications: no console errors
+- Dashboard: welcome page + project cards view
+- Board: correct column mapping, no duplicates
+- Backlog: sprint sections + filter controls
+- Sprints: active/planned sprints with progress bars
+- Settings: project config + board columns + danger zone
+- Burndown: SVG chart with stats cards and status breakdown
+- Roadmap: Gantt timeline with today marker and epic expansion
+- Labels: color-coded list with badge previews
+- Dark mode: proper theming across all views
 
 CI/CD STATUS:
 --------------
-- SSM parameter /claude-code/infra/deploy-state: NOT FOUND (CI/CD not triggered yet)
+- SSM parameter /claude-code/infra/deploy-state: NOT FOUND (CI/CD not triggered)
 - Frontend works fully with localStorage fallback
-- 5 commits pushed to agent-runtime branch
+- All code pushed to agent-runtime branch
+- If CI/CD deploys: extract API URL from SSM, write to frontend/.env as VITE_API_URL
 
 COMMITS:
 --------
@@ -79,6 +99,12 @@ COMMITS:
 3. 17821cb: feat: add localStorage fallback, init.sh, and e2e tests
 4. 9620a1e: fix: resolve duplicate issues in board columns and add screenshot tests
 5. 388b17a: feat: enhance dark theme and add CSS polish
+6. 267afb5: chore: update progress notes and add seed data helper
+7. 824bb53: feat: add Labels and Components management pages
+8. c6cb26c: feat: add accessibility CSS improvements
+9. 2f185b4: feat: enhance roadmap timeline, burndown charts, and issue detail panel
+10. 3d83aa1: feat: enhance backlog with filters/sorting, fix sidebar routes
+11. c2dd4a8: feat: add description field to project creation, improve modal UX
 
 ARCHITECTURE:
 --------------
@@ -87,10 +113,27 @@ generated-app/
 ├── tsconfig.base.json
 ├── init.sh               (quick start script)
 ├── shared/               (Zod schemas, types, endpoints - compiles OK)
+│   ├── schemas/          (project, issue, sprint, board, comment, search, common)
+│   ├── types.ts          (z.infer<> type exports)
+│   └── endpoints.ts      (API route map)
 ├── backend/              (Lambda handler with routing - compiles OK)
+│   └── src/
+│       ├── index.ts      (router)
+│       ├── handlers/     (projects, issues, sprints, boards, comments, search)
+│       └── lib/db.ts     (DynamoDB helpers)
 ├── infrastructure/       (CDK stack - synths OK, 10/10 tests pass)
+│   ├── lib/canopy-stack.ts
+│   ├── bin/canopy.ts
+│   └── test/canopy-stack.test.ts
 ├── frontend/             (React SPA - builds OK, dev server on port 6174)
-└── e2e-tests/            (Playwright tests - 7/7 pass)
+│   └── src/
+│       ├── api/client.ts         (API + localStorage fallback)
+│       ├── hooks/useApi.ts       (React Query hooks)
+│       ├── context/AppContext.tsx (global state)
+│       ├── pages/                (11 page components)
+│       ├── components/           (layout, issues, board, search, ui)
+│       └── lib/utils.ts          (helpers)
+└── e2e-tests/            (Playwright tests - 21/21 pass)
 
 DynamoDB Single-Table Design:
 - PK/SK composite keys
@@ -107,9 +150,10 @@ API Routes (Lambda router):
 - GET /projects/:id/board, PUT /boards/:id
 - GET /search
 
-WHAT'S LEFT:
------------
-- [ ] Wire VITE_API_URL once CI/CD deploys
-- [ ] Verify deployed API endpoints
-- [ ] Labels/Components management pages (stub)
-- [ ] More dark theme polish
+WHAT'S LEFT (Nice-to-haves):
+-----------------------------
+- [ ] Wire VITE_API_URL once CI/CD deploys (if it ever triggers)
+- [ ] Verify deployed API endpoints with curl
+- [ ] Advanced JQL-style filtering
+- [ ] Keyboard shortcuts help modal (?)
+- [ ] More drag-and-drop in backlog for sprint planning
