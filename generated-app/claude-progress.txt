@@ -1,7 +1,7 @@
 CANOPY PROJECT MANAGEMENT APP - Progress Tracker
 ==================================================
 
-CURRENT STATUS: Phase 2a complete, committing infrastructure + shared + backend stubs
+CURRENT STATUS: Phase 3 Complete, Phase 4 Polish In Progress
 LAST UPDATED: 2026-02-27
 
 COMPLETED:
@@ -30,28 +30,67 @@ Phase 2b: Backend Lambda Handlers (Full)
 - DynamoDB helpers in backend/src/lib/db.ts
 - Compiles successfully: cd backend && npx tsc --noEmit
 
-IN PROGRESS:
-------------
-- Need to commit and push to trigger CI/CD deployment
-- After deployment: wire frontend to API URL
+Phase 3: Frontend (React + Vite + Tailwind CSS v4)
+- All pages: Dashboard, BoardView, BacklogView, SprintsView, RoadmapView,
+  ReportsView (Burndown, Velocity, SprintReport), SettingsView
+- Components: TopNav, Sidebar (collapsible 240px/60px), AppLayout,
+  CreateIssueModal, IssueDetailPanel, SearchModal, Toast
+- API client with VITE_API_URL + full localStorage fallback
+- React Query hooks for all CRUD operations
+- AppContext: theme, sidebar, project, issue selection, modals
+- DnD: @dnd-kit integration on board view
+- Design: Forest palette (#1B4332, #D4A373, #FAF9F6)
+  Space Grotesk + DM Sans + JetBrains Mono
+- Dark theme with proper class toggling
+- Stagger animations, shimmer skeletons, smooth transitions
+- Keyboard shortcuts: ⌘K search, ⌘[ sidebar, C create, Escape close
+- Build: ~347KB JS + ~31KB CSS
 
-NEXT STEPS:
------------
-1. Commit shared+infra+backend and push
-2. Wait for CI/CD deployment
-3. Create frontend package with API wiring
-4. Build all UI pages (board, backlog, sprint, reports, etc.)
-5. Integration testing and polish
+Phase 4 (In Progress): Polish
+- Board column duplicate fix (placed tracking set)
+- Dark theme CSS enhancements (scrollbar, shimmer, focus rings)
+- E2E tests: 7/7 passing (create project, board, backlog, sprints, settings)
+
+VERIFICATION RESULTS (all PASS):
+---------------------------------
+- shared-schemas-compile: PASS
+- cdk-synth: PASS
+- cdk-tests (10/10): PASS
+- backend-compile: PASS
+- frontend-build: PASS
+- E2E tests (7/7): PASS
+- Dashboard screenshot: no console errors
+- Board screenshot: correct column mapping
+- Backlog screenshot: sprint sections + backlog section
+- Sprints screenshot: active/planned sprints
+- Settings screenshot: project config + danger zone
+- Burndown screenshot: progress stats
+
+CI/CD STATUS:
+--------------
+- SSM parameter /claude-code/infra/deploy-state: NOT FOUND (CI/CD not triggered yet)
+- Frontend works fully with localStorage fallback
+- 5 commits pushed to agent-runtime branch
+
+COMMITS:
+--------
+1. be11a1e: feat: add shared API contract, CDK infrastructure, and backend handlers
+2. f3c26c7: feat: add React frontend with full page structure and components
+3. 17821cb: feat: add localStorage fallback, init.sh, and e2e tests
+4. 9620a1e: fix: resolve duplicate issues in board columns and add screenshot tests
+5. 388b17a: feat: enhance dark theme and add CSS polish
 
 ARCHITECTURE:
 --------------
 generated-app/
 ├── package.json          (workspace root)
 ├── tsconfig.base.json
+├── init.sh               (quick start script)
 ├── shared/               (Zod schemas, types, endpoints - compiles OK)
 ├── backend/              (Lambda handler with routing - compiles OK)
 ├── infrastructure/       (CDK stack - synths OK, 10/10 tests pass)
-└── frontend/             (TO DO - will be created in Phase 3)
+├── frontend/             (React SPA - builds OK, dev server on port 6174)
+└── e2e-tests/            (Playwright tests - 7/7 pass)
 
 DynamoDB Single-Table Design:
 - PK/SK composite keys
@@ -67,3 +106,10 @@ API Routes (Lambda router):
 - POST/GET /projects/:id/sprints, PUT /sprints/:id
 - GET /projects/:id/board, PUT /boards/:id
 - GET /search
+
+WHAT'S LEFT:
+-----------
+- [ ] Wire VITE_API_URL once CI/CD deploys
+- [ ] Verify deployed API endpoints
+- [ ] Labels/Components management pages (stub)
+- [ ] More dark theme polish
