@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { DndContext, DragOverlay, closestCorners, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, MoreHorizontal } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useIssues, useBoard, useUpdateIssue, useCreateIssue } from '../hooks/useApi';
 import { useApp } from '../context/AppContext';
 import { issueTypeConfig, priorityConfig, statusConfig, cn } from '../lib/utils';
@@ -111,6 +111,7 @@ export function BoardView() {
   const updateIssue = useUpdateIssue();
   const { selectIssue, toggleCreateModal, setCurrentProject } = useApp();
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [quickFilter, setQuickFilter] = useState('');
 
   React.useEffect(() => {
     if (projectId) setCurrentProject(projectId);
@@ -128,15 +129,26 @@ export function BoardView() {
     return board.columns.sort((a, b) => a.sortOrder - b.sortOrder);
   }, [board]);
 
+  const filteredIssues = useMemo(() => {
+    if (!issues) return null;
+    if (!quickFilter) return issues;
+    const q = quickFilter.toLowerCase();
+    return issues.filter(i =>
+      i.summary.toLowerCase().includes(q) ||
+      i.key.toLowerCase().includes(q) ||
+      i.type.toLowerCase().includes(q)
+    );
+  }, [issues, quickFilter]);
+
   const columnIssues = useMemo(() => {
-    if (!issues) return {};
+    if (!filteredIssues) return {};
     const map: Record<string, Issue[]> = {};
     // Track which issues have been placed to avoid duplicates
     const placed = new Set<string>();
 
     columns.forEach(col => {
       const colSlug = col.name.toLowerCase().replace(/ /g, '_');
-      map[col.id] = issues.filter(issue => {
+      map[col.id] = filteredIssues.filter(issue => {
         if (placed.has(issue.id)) return false;
 
         // Direct status match to column name slug
@@ -160,13 +172,13 @@ export function BoardView() {
 
     // Place any unmatched issues into the first column
     const placedAll = new Set(Object.values(map).flat().map(i => i.id));
-    const unmatched = issues.filter(i => !placedAll.has(i.id));
+    const unmatched = filteredIssues.filter(i => !placedAll.has(i.id));
     if (unmatched.length > 0 && columns.length > 0) {
       map[columns[0].id] = [...(map[columns[0].id] || []), ...unmatched];
     }
 
     return map;
-  }, [issues, columns]);
+  }, [filteredIssues, columns]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -223,11 +235,23 @@ export function BoardView() {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 gap-3">
         <h1 className="text-xl font-display font-bold text-[#2D3748] dark:text-[#E8ECF4]">Board</h1>
+        <div className="flex items-center gap-2 flex-1 max-w-xs">
+          <div className="relative flex-1">
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8896A6]" />
+            <input
+              type="text"
+              value={quickFilter}
+              onChange={e => setQuickFilter(e.target.value)}
+              placeholder="Filter cards..."
+              className="w-full pl-8 pr-3 py-1.5 border border-[#E5E1DB] dark:border-[#3D4556] rounded-md text-sm focus:outline-none focus:border-[#D4A373] dark:bg-[#1A1F2E] dark:text-[#E8ECF4] placeholder:text-[#8896A6] transition-colors"
+            />
+          </div>
+        </div>
         <button
           onClick={toggleCreateModal}
-          className="flex items-center gap-1.5 bg-[#D4A373] hover:bg-[#c49363] text-white rounded-md px-3 py-1.5 text-sm font-medium transition-all"
+          className="flex items-center gap-1.5 bg-[#D4A373] hover:bg-[#c49363] text-white rounded-md px-3 py-1.5 text-sm font-medium transition-all flex-shrink-0"
         >
           <Plus size={16} /> Create Issue
         </button>
