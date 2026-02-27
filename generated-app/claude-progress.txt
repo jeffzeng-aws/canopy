@@ -2,7 +2,7 @@ CANOPY PROJECT MANAGEMENT APP - Progress Tracker
 ==================================================
 
 CURRENT STATUS: Phase 4 Polish Complete - Full-Featured App
-LAST UPDATED: 2026-02-27 (Session 3)
+LAST UPDATED: 2026-02-27 (Session 4)
 
 COMPLETED:
 -----------
@@ -38,13 +38,13 @@ Phase 3: Frontend (React 19 + Vite + Tailwind CSS v4)
 - API client with VITE_API_URL + full localStorage fallback
 - React Query hooks for all CRUD operations
 - AppContext: theme, sidebar, project, issue selection, modals
-- DnD: @dnd-kit integration on board view
+- DnD: @dnd-kit integration with PointerSensor (8px activation for clicks)
 - Design: Forest palette (#1B4332, #D4A373, #FAF9F6)
   Space Grotesk + DM Sans + JetBrains Mono
-- Dark theme with proper class toggling
+- Dark theme: @custom-variant dark with class toggling
 - Stagger animations, shimmer skeletons, smooth transitions
 - Keyboard shortcuts: ⌘K search, ⌘[ sidebar, C create, ? shortcuts, Esc close
-- Build: ~403KB JS + ~37KB CSS
+- Build: ~411KB JS + ~37KB CSS
 
 Phase 4: Polish (Complete)
 - ErrorBoundary component wrapping all routes
@@ -58,14 +58,17 @@ Phase 4: Polish (Complete)
 - RoadmapView: Gantt-style timeline, week/month headers, TODAY marker
 - ReportsView: SVG burndown/velocity charts, sprint report with stats
 - IssueDetailPanel: Sprint assignment, time tracking, inline editing, delete confirm
-- CreateIssueModal: No-project warning, description field
+  NEW: Assignee field, Labels field, Due Date field, Time Estimate field
+- CreateIssueModal: No-project warning, description, labels, due date fields
 - Dashboard: Description field, click-outside-to-close
-- Sidebar: Fixed routes, improved active state
+- Sidebar: Fixed routes, improved active state, data-testid attributes
+- TopNav: data-testid for search, create, theme toggle
 - KeyboardShortcuts dialog (? key)
-- Dark mode across all views
+- Dark mode: Fixed with @custom-variant dark for Tailwind CSS v4
 - Accessibility: prefers-reduced-motion, focus-visible rings
+- DnD: PointerSensor with 8px activation for better click handling
 
-VERIFICATION RESULTS (all PASS):
+VERIFICATION RESULTS (ALL PASS):
 ---------------------------------
 Backend (5/5):
 - shared-schemas-compile: PASS
@@ -74,23 +77,35 @@ Backend (5/5):
 - backend-compile: PASS
 - frontend-build: PASS
 
-E2E Tests (23/23):
-- create-project: 3 tests
-- full-workflow: 4 tests
-- dark-mode: 3 tests
-- screenshot-helper: 6 tests
-- seed-screenshots: 5 tests
-- roadmap-screenshot: 2 tests
+E2E Screenshot Tests (10/10):
+- dashboard with projects: PASS
+- board view with issues: PASS
+- backlog view with issues: PASS
+- sprints view: PASS
+- roadmap view: PASS
+- burndown report: PASS
+- settings view: PASS
+- issue detail panel: PASS
+- create issue modal: PASS
+- dark mode board: PASS
+
+Functional Tests (7/7):
+- create issue via modal: PASS
+- navigate between pages: PASS
+- issue detail panel opens/closes: PASS
+- sidebar collapse/expand: PASS
+- search modal opens and filters: PASS
+- dark mode toggle: PASS
+- board quick filter: PASS
 
 CI/CD STATUS:
 --------------
 - SSM parameter /claude-code/infra/deploy-state: NOT FOUND (CI/CD not triggered)
-- Attempted direct cdk deploy: blocked by IAM (no CDK bootstrap access)
 - Frontend works fully with localStorage fallback
-- All code pushed to agent-runtime branch (20 commits)
+- All code pushed to agent-runtime branch
 - If CI/CD deploys: extract API URL from SSM, write to frontend/.env as VITE_API_URL
 
-COMMITS (20 total across 3 sessions):
+COMMITS (28+ total across 4 sessions):
 --------------------------------------
 Session 1:
 1. be11a1e: feat: add shared API contract with Zod schemas
@@ -116,6 +131,17 @@ Session 3:
 17. b7344d7: fix: replace page reload with query invalidation, improve create modal
 18. 0682aff: feat: enhance sprints view with inline editing, date inputs
 19. de147b6: feat: add move-to-sprint action on backlog issues
+20. 9f55802: chore: update progress tracker
+21. 9816573: feat: add project statistics section to settings page
+22. 8eefcab: feat: consolidate global keyboard shortcuts in AppLayout
+23. c815497: feat: add quick filter to board view for searching cards
+
+Session 4:
+24. 2baba85: test: add comprehensive screenshot test suite with seeded data
+25. 7ec8e0d: feat: add assignee/labels/due date fields and data-testid attributes
+26. f79ab76: fix: enable dark mode with Tailwind CSS v4 custom variant
+27. 7255eda: test: add comprehensive functional tests (7/7 passing)
+28. 2e60a7e: fix: add pointer sensor to dnd-kit for better click handling
 
 ARCHITECTURE:
 --------------
@@ -143,7 +169,9 @@ generated-app/
 │       ├── pages/                (11 page components)
 │       ├── components/           (layout, issues, search, ui)
 │       └── lib/utils.ts          (helpers)
-└── e2e-tests/            (Playwright tests - 23/23 pass)
+└── e2e-tests/            (Playwright tests - 17/17 pass)
+    ├── screenshot-all-pages.spec.ts (10 tests)
+    └── functional-tests.spec.ts (7 tests)
 
 DynamoDB Single-Table Design:
 - PK/SK composite keys
@@ -160,6 +188,18 @@ API Routes (Lambda router):
 - GET /projects/:id/board, PUT /boards/:id
 - GET /search
 
+DATA-TESTID ATTRIBUTES:
+- top-nav: TopNav header
+- search-btn: Search button
+- create-issue-btn: Create issue button
+- theme-toggle: Theme toggle button
+- sidebar: Sidebar navigation
+- sidebar-toggle: Sidebar collapse/expand button
+- main-content: Main content area
+- issue-detail-panel: Issue detail slide-in panel
+- create-issue-modal: Create issue modal dialog
+- create-issue-modal-overlay: Modal backdrop overlay
+
 WHAT'S LEFT (Nice-to-haves):
 -----------------------------
 - [ ] Wire VITE_API_URL once CI/CD deploys (if it ever triggers)
@@ -167,3 +207,5 @@ WHAT'S LEFT (Nice-to-haves):
 - [ ] Real comment persistence via API
 - [ ] Drag-and-drop between sprint and backlog sections
 - [ ] Activity log / audit trail
+- [ ] Epic linking and sub-task hierarchy
+- [ ] User authentication and assignee avatars
