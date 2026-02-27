@@ -143,6 +143,7 @@ jobs:
 
       - name: Signal deploy started
         if: steps.check.outputs.exists == 'true'
+        continue-on-error: true
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           STATE=$(jq -nc --arg c "${{ github.sha }}" --arg t "$TIMESTAMP" \
@@ -170,6 +171,7 @@ jobs:
 
       - name: Signal deploy succeeded
         if: steps.check.outputs.exists == 'true' && steps.deploy.outputs.api_url != ''
+        continue-on-error: true
         env:
           API_URL: ${{ steps.deploy.outputs.api_url }}
           ISSUE_NUMBER: ${{ steps.extract-issue.outputs.issue_number }}
@@ -192,6 +194,7 @@ jobs:
 
       - name: Signal deploy failed
         if: failure() && steps.check.outputs.exists == 'true'
+        continue-on-error: true
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -230,3 +233,4 @@ jobs:
     with:
       issue_number: ${{ needs.deploy-infrastructure.outputs.issue_number }}
     secrets: inherit
+
