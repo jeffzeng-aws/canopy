@@ -1,3 +1,12 @@
+/**
+ * Canopy Infrastructure Stack
+ *
+ * Defines all AWS resources for the Canopy project management application:
+ * - DynamoDB (single-table design with 3 GSIs)
+ * - Lambda function (Node.js 20, bundled with esbuild)
+ * - API Gateway HTTP API (with CORS)
+ * - S3 bucket + CloudFront distribution (frontend hosting)
+ */
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
