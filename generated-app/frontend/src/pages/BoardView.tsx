@@ -64,11 +64,12 @@ function BoardColumn({
   onQuickCreate: (status: string) => void;
 }) {
   const statusColor = statusConfig[column.name.toLowerCase().replace(/ /g, '_')]?.color || column.color || '#8896A6';
+  const totalPoints = issues.reduce((s, i) => s + (i.storyPoints || 0), 0);
 
   return (
     <div className="flex-shrink-0 w-[300px] flex flex-col bg-[#f5f3ef] dark:bg-[#1E2536] rounded-lg">
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[#E5E1DB] dark:border-[#3D4556]">
-        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: statusColor }} />
+        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
         <h3 className="text-sm font-display font-semibold text-[#2D3748] dark:text-[#E8ECF4]">{column.name}</h3>
         <span className="text-xs text-[#8896A6] bg-white dark:bg-[#242B3D] px-1.5 py-0.5 rounded-full">{issues.length}</span>
         {column.wipLimit && issues.length > column.wipLimit && (
@@ -92,6 +93,13 @@ function BoardColumn({
           )}
         </div>
       </SortableContext>
+
+      {/* Column footer with point total */}
+      {totalPoints > 0 && (
+        <div className="px-3 py-1.5 border-t border-[#E5E1DB]/50 dark:border-[#3D4556]/50">
+          <span className="text-[10px] font-mono text-[#8896A6]">{totalPoints} pts</span>
+        </div>
+      )}
     </div>
   );
 }
