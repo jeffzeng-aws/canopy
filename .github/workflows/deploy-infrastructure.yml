@@ -161,12 +161,26 @@ jobs:
         working-directory: generated-app/infrastructure
         run: |
           set -o pipefail
-          npx cdk deploy --require-approval never --outputs-file /tmp/cdk-outputs.json 2>&1 | tee -a /tmp/infra-build.log
-          if [ -f /tmp/cdk-outputs.json ]; then
-            API_URL=$(jq -r '.[].ApiUrl // empty' /tmp/cdk-outputs.json)
-          else
-            API_URL=""
+          TEMPLATE_FILE="cdk.out/canopy-app-stack.template.json"
+          if [ ! -f "$TEMPLATE_FILE" ]; then
+            npx cdk synth 2>&1 | tee -a /tmp/infra-build.log
           fi
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          ASSET_BUCKET="cdk-hnb659fds-assets-${ACCOUNT_ID}-us-east-1"
+          for asset_dir in cdk.out/asset.*; do
+            if [ -d "$asset_dir" ]; then
+              ASSET_HASH=$(basename "$asset_dir" | sed 's/asset.//')
+              if ls "$asset_dir"/*.js 1>/dev/null 2>&1; then
+                pushd "$asset_dir" > /dev/null
+                zip -r "/tmp/${ASSET_HASH}.zip" . 2>&1 | tail -1
+                aws s3 cp "/tmp/${ASSET_HASH}.zip" "s3://${ASSET_BUCKET}/${ASSET_HASH}.zip" 2>&1 | tee -a /tmp/infra-build.log
+                popd > /dev/null
+              fi
+            fi
+          done
+          aws cloudformation deploy             --template-file "$TEMPLATE_FILE"             --stack-name canopy-app-stack             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND             --no-fail-on-empty-changeset             2>&1 | tee -a /tmp/infra-build.log
+          API_URL=$(aws cloudformation describe-stacks             --stack-name canopy-app-stack             --query "Stacks[0].Outputs[?OutputKey==\`ApiUrl\`].OutputValue"             --output text 2>/dev/null || echo "")
+          echo "API URL: $API_URL"
           echo "api_url=$API_URL" >> $GITHUB_OUTPUT
 
       - name: Signal deploy succeeded
