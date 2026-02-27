@@ -34,10 +34,23 @@ function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
         <span className="text-xs font-mono text-[#8896A6]">{issue.key}</span>
       </div>
       <p className="text-sm text-[#2D3748] dark:text-[#E8ECF4] font-medium line-clamp-2">{issue.summary}</p>
+      {issue.labels && issue.labels.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+          {issue.labels.slice(0, 3).map((label: string) => (
+            <span key={label} className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#D4A373]/10 text-[#D4A373] font-medium">{label}</span>
+          ))}
+          {issue.labels.length > 3 && <span className="text-[10px] text-[#8896A6]">+{issue.labels.length - 3}</span>}
+        </div>
+      )}
       <div className="flex items-center gap-2 mt-2">
         {issue.storyPoints != null && (
           <span className="text-xs bg-[#f0ede8] dark:bg-[#1A1F2E] text-[#5A6578] px-1.5 py-0.5 rounded font-mono">
             {issue.storyPoints}
+          </span>
+        )}
+        {issue.dueDate && (
+          <span className="text-[10px] text-[#BC6C25]" title={`Due ${new Date(issue.dueDate).toLocaleDateString()}`}>
+            📅
           </span>
         )}
         <span
@@ -47,6 +60,11 @@ function IssueCard({ issue, onClick }: { issue: Issue; onClick: () => void }) {
         >
           {priorityConfig[issue.priority]?.icon}
         </span>
+        {issue.assigneeId && (
+          <span className="w-5 h-5 rounded-full bg-[#52796F] text-white text-[8px] font-bold flex items-center justify-center flex-shrink-0" title={issue.assigneeId}>
+            {issue.assigneeId.slice(0, 1).toUpperCase()}
+          </span>
+        )}
       </div>
     </div>
   );
