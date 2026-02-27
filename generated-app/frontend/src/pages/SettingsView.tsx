@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Settings, Trash2, Save, AlertTriangle } from 'lucide-react';
-import { useProject, useUpdateProject, useDeleteProject, useBoard, useUpdateBoard } from '../hooks/useApi';
+import { Settings, Trash2, Save, AlertTriangle, BarChart3 } from 'lucide-react';
+import { useProject, useUpdateProject, useDeleteProject, useBoard, useUpdateBoard, useIssues, useSprints } from '../hooks/useApi';
 import { useApp } from '../context/AppContext';
 import { showToast } from '../components/ui/Toast';
+import { statusConfig } from '../lib/utils';
 
 export function SettingsView() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -13,6 +14,8 @@ export function SettingsView() {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
   const updateBoard = useUpdateBoard();
+  const { data: issues } = useIssues(projectId);
+  const { data: sprints } = useSprints(projectId);
   const { setCurrentProject } = useApp();
 
   const [name, setName] = useState('');
@@ -124,6 +127,60 @@ export function SettingsView() {
           <Save size={16} /> Save Changes
         </button>
       </section>
+
+      {/* Project Statistics */}
+      {issues && (
+        <section className="bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-[#8896A6] uppercase tracking-wider flex items-center gap-2">
+            <BarChart3 size={14} /> Statistics
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-[#f8f6f2] dark:bg-[#1A1F2E] rounded-lg p-3 text-center">
+              <p className="text-2xl font-display font-bold text-[#2D3748] dark:text-[#E8ECF4]">{issues.length}</p>
+              <p className="text-xs text-[#8896A6]">Total Issues</p>
+            </div>
+            <div className="bg-[#f8f6f2] dark:bg-[#1A1F2E] rounded-lg p-3 text-center">
+              <p className="text-2xl font-display font-bold text-[#40916C]">{issues.filter(i => i.status === 'done').length}</p>
+              <p className="text-xs text-[#8896A6]">Completed</p>
+            </div>
+            <div className="bg-[#f8f6f2] dark:bg-[#1A1F2E] rounded-lg p-3 text-center">
+              <p className="text-2xl font-display font-bold text-[#2196F3]">{issues.filter(i => i.status === 'in_progress' || i.status === 'in_review').length}</p>
+              <p className="text-xs text-[#8896A6]">In Progress</p>
+            </div>
+            <div className="bg-[#f8f6f2] dark:bg-[#1A1F2E] rounded-lg p-3 text-center">
+              <p className="text-2xl font-display font-bold text-[#D4A373]">{issues.reduce((s, i) => s + (i.storyPoints || 0), 0)}</p>
+              <p className="text-xs text-[#8896A6]">Story Points</p>
+            </div>
+          </div>
+          {/* Status breakdown bar */}
+          {issues.length > 0 && (
+            <div className="flex rounded-full overflow-hidden h-3">
+              {Object.entries(
+                issues.reduce<Record<string, number>>((acc, i) => {
+                  acc[i.status] = (acc[i.status] || 0) + 1;
+                  return acc;
+                }, {})
+              ).map(([status, count]) => (
+                <div
+                  key={status}
+                  className="transition-all"
+                  style={{
+                    width: `${(count / issues.length) * 100}%`,
+                    backgroundColor: statusConfig[status]?.color || '#8896A6',
+                  }}
+                  title={`${statusConfig[status]?.label || status}: ${count} (${Math.round((count / issues.length) * 100)}%)`}
+                />
+              ))}
+            </div>
+          )}
+          {sprints && sprints.length > 0 && (
+            <div className="flex items-center gap-4 text-xs text-[#8896A6]">
+              <span>{sprints.filter(s => s.status === 'active').length} active sprints</span>
+              <span>{sprints.filter(s => s.status === 'completed').length} completed sprints</span>
+            </div>
+          )}
+        </section>
+      )}
 
       {board && (
         <section className="bg-white dark:bg-[#242B3D] border border-[#E5E1DB] dark:border-[#3D4556] rounded-lg p-6 space-y-4">
