@@ -30,8 +30,8 @@ export function Sidebar() {
     { icon: <BarChart3 size={20} />, label: 'Burndown', path: `/project/${projectId}/reports/burndown`, section: 'Reports' },
     { icon: <TrendingUp size={20} />, label: 'Velocity', path: `/project/${projectId}/reports/velocity`, section: 'Reports' },
     { icon: <FileText size={20} />, label: 'Sprint Report', path: `/project/${projectId}/reports/sprint`, section: 'Reports' },
-    { icon: <Tag size={20} />, label: 'Labels', path: `/project/${projectId}/settings/labels`, section: 'Project' },
-    { icon: <Layers size={20} />, label: 'Components', path: `/project/${projectId}/settings/components`, section: 'Project' },
+    { icon: <Tag size={20} />, label: 'Labels', path: `/project/${projectId}/labels`, section: 'Project' },
+    { icon: <Layers size={20} />, label: 'Components', path: `/project/${projectId}/components`, section: 'Project' },
     { icon: <Settings size={20} />, label: 'Settings', path: `/project/${projectId}/settings`, section: 'Project' },
   ] : [];
 
@@ -60,7 +60,7 @@ export function Sidebar() {
                 </p>
               )}
               {items.map(item => {
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname === item.path || (item.path.endsWith('/settings') && location.pathname.startsWith(item.path));
                 return (
                   <button
                     key={item.path}
