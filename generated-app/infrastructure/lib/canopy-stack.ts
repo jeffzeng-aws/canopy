@@ -6,6 +6,8 @@
  * - Lambda function (Node.js 20, bundled with esbuild)
  * - API Gateway HTTP API (with CORS)
  * - S3 bucket + CloudFront distribution (frontend hosting)
+ *
+ * @version 2.0 - CI/CD compatible
  */
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
