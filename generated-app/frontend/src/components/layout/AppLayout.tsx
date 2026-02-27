@@ -7,6 +7,7 @@ import { SearchModal } from '../search/SearchModal';
 import { IssueDetailPanel } from '../issues/IssueDetailPanel';
 import { useApp } from '../../context/AppContext';
 import { Toast } from '../ui/Toast';
+import { KeyboardShortcuts } from '../ui/KeyboardShortcuts';
 
 export function AppLayout() {
   const { state } = useApp();
@@ -26,6 +27,7 @@ export function AppLayout() {
       {state.createModalOpen && <CreateIssueModal />}
       {state.searchOpen && <SearchModal />}
       <Toast />
+      <KeyboardShortcuts />
     </div>
   );
 }
